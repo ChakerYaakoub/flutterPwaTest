@@ -1,6 +1,20 @@
-# altimetre
+## Screenshots
 
+<p align="center">
+<em>Home</em>
+</p>
+<p align="center">
+    <img src="imagesReadMe/image.jpeg" width="200" alt="home " style="margin: auto; display: block; margin-top: 10px; margin-bottom: 10px;">
+</p>
 
-- [The Mahagony Staircase](https://www.youtube.com/watch?v=dkyY9WCGMi0) par Ian Hickson (Flutter co-founder) dans l'équipe Flutter à ses débuts. La présentation couvre les différentes couches, de widgets à dart:ui.
-- [Flutter's Rendering Pipeline](https://www.youtube.com/watch?v=UUfXWzp0-DU) par Adam Barth (Tech Lead Flutter a l'époque). La présentation couvre la façon dont Flutter gère le rendering (layout, painting et composition)
-- [Lifecycle of a Widget](https://www.youtube.com/watch?v=_gIbneld-bw) par Craig Labenz qui explique les différents cycles de vies associés à un State, Element et comment ils sont gérés par le Scheduler entre chaque frame.
+<hr />
+
+<p align="center">
+<em>Settings</em>
+</p>
+<p align="center">
+    <img src="imagesReadMe/image1.jpeg" width="200" alt="Settings" style="margin: auto; display: block; margin-top: 10px; margin-bottom: 10px;">
+    
+</p>
+
+<hr />

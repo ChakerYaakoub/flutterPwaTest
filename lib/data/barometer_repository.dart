@@ -7,7 +7,7 @@ class BarometerRepository {
     return barometerEventStream().map((event) {
       print('Raw pressure event: ${event.pressure}'); // Debug print
       if (event.pressure <= 0 || event.pressure > 2000) {
-        throw Exception('Invalid pressure reading: ${event.pressure}');
+        throw Exception('Invalid pressure reading');
       }
       return event.pressure;
     }).handleError((error) {

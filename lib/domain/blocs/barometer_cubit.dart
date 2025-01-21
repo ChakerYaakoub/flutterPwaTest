@@ -71,6 +71,7 @@ class BarometerCubit extends Cubit<BarometerState> {
       print('Barometer not available on this device'); // Debug print
     }
 
+    // Handle location updates
     try {
       _locationSubscription = _locationRepository.getLocationStream().listen(
         (value) async {
@@ -80,12 +81,16 @@ class BarometerCubit extends Cubit<BarometerState> {
               gpsElevation: () => value.elevation,
             ),
           );
-          _forecast = await _weatherRepository.getWeatherAt(value);
-          emit(
-            state.copyWith(
-              forecast: () => _forecast,
-            ),
-          );
+          try {
+            _forecast = await _weatherRepository.getWeatherAt(value);
+            emit(
+              state.copyWith(
+                forecast: () => _forecast,
+              ),
+            );
+          } catch (e) {
+            print('Weather fetch error: $e'); // Debug print
+          }
         },
         onError: (e) {
           print('Location error: $e'); // Debug print
