@@ -95,6 +95,40 @@ class SettingsPage extends StatelessWidget {
                 );
               }),
             ),
+            const SizedBox(height: 16),
+            const Text('Distance'),
+            ListTile(
+              title: const Text('Meters'),
+              leading: Builder(builder: (context) {
+                final value = context
+                    .select((SettingsCubit cubit) => cubit.state.distance);
+                return Radio<DistanceUnit>(
+                  value: DistanceUnit.meters,
+                  groupValue: value,
+                  onChanged: (value) {
+                    if (value != null) {
+                      context.read<SettingsCubit>().updateDistanceUnit(value);
+                    }
+                  },
+                );
+              }),
+            ),
+            ListTile(
+              title: const Text('Feet'),
+              leading: Builder(builder: (context) {
+                final value = context
+                    .select((SettingsCubit cubit) => cubit.state.distance);
+                return Radio<DistanceUnit>(
+                  value: DistanceUnit.feet,
+                  groupValue: value,
+                  onChanged: (value) {
+                    if (value != null) {
+                      context.read<SettingsCubit>().updateDistanceUnit(value);
+                    }
+                  },
+                );
+              }),
+            ),
           ],
         ),
       ),

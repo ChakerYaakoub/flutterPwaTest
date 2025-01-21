@@ -7,3 +7,8 @@ enum PressureUnit {
   hPa,
   inHg,
 }
+
+enum DistanceUnit {
+  meters,
+  feet,
+}

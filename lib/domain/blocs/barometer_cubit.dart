@@ -35,46 +35,69 @@ class BarometerCubit extends Cubit<BarometerState> {
     _pressureSubscription?.cancel();
     _locationSubscription?.cancel();
 
-    try {
-      _pressureSubscription =
-          _barometerRepository.getBarometerEventStream().listen(
-        (value) {
-          emit(
-            state.copyWith(
-              pressure: () => value,
-              elevation: () => calculateElevation(
-                pressure: value,
-                pressureAtSeaLevel:
-                    _forecast?.seaLevelPressure ?? defaultPressureAtSeaLevel,
-                temperatureAtSeaLevelInK: _forecast != null
-                    ? celsiusToKelvin(_forecast!.temperature)
-                    : defaultTemperatureAtSeaLevelInK,
-              ),
-            ),
-          );
-        },
-        onError: (e) {
-          emit(state.copyWith(pressure: () => null));
-        },
-      );
-    } catch (e) {/* no-op */}
+    // Check if barometer is available
+    if (await _barometerRepository.isBarometerAvailable()) {
+      try {
+        _pressureSubscription =
+            _barometerRepository.getBarometerEventStream().listen(
+          (value) {
+            print('Received pressure value: $value'); // Debug print
+            if (value > 0) {
+              // Only emit if we get valid readings
+              emit(
+                state.copyWith(
+                  pressure: () => value,
+                  elevation: () => calculateElevation(
+                    pressure: value,
+                    pressureAtSeaLevel: _forecast?.seaLevelPressure ??
+                        defaultPressureAtSeaLevel,
+                    temperatureAtSeaLevelInK: _forecast != null
+                        ? celsiusToKelvin(_forecast!.temperature)
+                        : defaultTemperatureAtSeaLevelInK,
+                  ),
+                ),
+              );
+            }
+          },
+          onError: (e) {
+            print('Pressure sensor error: $e'); // Debug print
+            emit(state.copyWith(pressure: () => null));
+          },
+        );
+      } catch (e) {
+        print('Error setting up pressure sensor: $e'); // Debug print
+      }
+    } else {
+      print('Barometer not available on this device'); // Debug print
+    }
 
     try {
       _locationSubscription = _locationRepository.getLocationStream().listen(
         (value) async {
+          print('Received location update: $value'); // Debug print
           emit(
             state.copyWith(
               gpsElevation: () => value.elevation,
             ),
           );
           _forecast = await _weatherRepository.getWeatherAt(value);
-          print(_forecast);
+          emit(
+            state.copyWith(
+              forecast: () => _forecast,
+            ),
+          );
         },
         onError: (e) {
-          emit(state.copyWith(gpsElevation: () => null));
+          print('Location error: $e'); // Debug print
+          emit(state.copyWith(
+            gpsElevation: () => null,
+            forecast: () => null,
+          ));
         },
       );
-    } catch (e) {/* no-op */}
+    } catch (e) {
+      print('Error setting up location updates: $e'); // Debug print
+    }
   }
 
   @override

@@ -9,6 +9,7 @@ class SettingsRepository {
 
   static const _temperatureUnitKey = 'temperature_unit';
   static const _pressureUnitKey = 'pressure_unit';
+  static const _distanceUnitKey = 'distance_unit';
 
   Future<void> _ensureInitialized() async {
     if (!_initCompleter.isCompleted) {
@@ -51,5 +52,16 @@ class SettingsRepository {
   Future<void> setPressureUnit(PressureUnit unit) async {
     await _ensureInitialized();
     await _prefs.setInt(_pressureUnitKey, unit.index);
+  }
+
+  Future<DistanceUnit> getDistanceUnit() async {
+    await _ensureInitialized();
+    final unit = _prefs.getInt(_distanceUnitKey) ?? DistanceUnit.meters.index;
+    return DistanceUnit.values[unit];
+  }
+
+  Future<void> setDistanceUnit(DistanceUnit unit) async {
+    await _ensureInitialized();
+    await _prefs.setInt(_distanceUnitKey, unit.index);
   }
 }

@@ -16,11 +16,13 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> loadSettings() async {
     final temperature = await _settingsRepository.getTemperatureUnit();
     final pressure = await _settingsRepository.getPressureUnit();
+    final distance = await _settingsRepository.getDistanceUnit();
 
     emit(
       SettingsState(
         temperature: temperature,
         pressure: pressure,
+        distance: distance,
       ),
     );
   }
@@ -33,5 +35,10 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> updatePressureUnit(PressureUnit unit) async {
     await _settingsRepository.setPressureUnit(unit);
     emit(state.copyWith(pressure: unit));
+  }
+
+  Future<void> updateDistanceUnit(DistanceUnit unit) async {
+    await _settingsRepository.setDistanceUnit(unit);
+    emit(state.copyWith(distance: unit));
   }
 }

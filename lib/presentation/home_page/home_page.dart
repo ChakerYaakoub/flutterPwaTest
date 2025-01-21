@@ -4,12 +4,15 @@ import 'package:altimetre/data/barometer_repository.dart';
 import 'package:altimetre/data/settings_repository.dart';
 import 'package:altimetre/domain/blocs/barometer_cubit.dart';
 import 'package:altimetre/domain/blocs/settings_cubit.dart';
+import 'package:altimetre/domain/models/units.dart';
 import 'package:altimetre/presentation/home_page/widgets/gauge.dart';
 import 'package:altimetre/presentation/paddings.dart';
 import 'package:altimetre/presentation/settings_page/settings_page.dart';
+import 'package:altimetre/utils/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,34 +22,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  double _pressure = 0.0;
-  StreamSubscription<BarometerEvent>? _subscription;
-
-  @override
-  void initState() {
-    _subscription = barometerEventStream().listen((event) {
-      setState(() {
-        _pressure = event.pressure;
-      });
-    });
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return BlocProvider(
       create: (context) => BarometerCubit(
-          barometerRepository: context.read<BarometerRepository>())
-        ..listenUpdates(),
+        barometerRepository: context.read<BarometerRepository>(),
+      )..listenUpdates(),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Voluptuaria'),
@@ -56,50 +37,77 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => RepositoryProvider(
-                      create: (context) => SettingsRepository(),
-                      child: BlocProvider(
-                          create: (context) => SettingsCubit(
-                              settingsRepository:
-                                  context.read<SettingsRepository>()),
-                          child: const SettingsPage()),
-                    ),
+                    builder: (context) => const SettingsPage(),
                   ),
                 );
               },
             ),
           ],
         ),
-        body: Center(
-          child: BlocBuilder<BarometerCubit, BarometerState>(
-            builder: (context, state) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  if (state.pressure != null) Gauge(value: state.pressure!),
-                  Text(
-                    '${state.pressure} hPa',
-                    style: textTheme.displayMedium,
-                  ),
-                  Row(
+        body: BlocBuilder<BarometerCubit, BarometerState>(
+          builder: (context, barometerState) {
+            return BlocBuilder<SettingsCubit, SettingsState>(
+              builder: (context, settingsState) {
+                // Get pressure value with fallback
+                final pressure = barometerState.pressure ?? 0.0;
+                final displayPressure =
+                    settingsState.pressure == PressureUnit.inHg
+                        ? hPaToInHg(pressure)
+                        : pressure;
+
+                // Get temperature with fallback
+                final temperature = barometerState.forecast?.temperature ?? 0.0;
+                final displayTemperature =
+                    settingsState.temperature == TemperatureUnit.fahrenheit
+                        ? celsiusToFahrenheit(temperature)
+                        : temperature;
+
+                // Get elevation values with fallback
+                final measuredElevation = barometerState.elevation ?? 0.0;
+                final gpsElevation = barometerState.gpsElevation ?? 0.0;
+
+                final displayMeasured =
+                    settingsState.distance == DistanceUnit.feet
+                        ? metersToFeet(measuredElevation)
+                        : measuredElevation;
+
+                final displayGPS = settingsState.distance == DistanceUnit.feet
+                    ? metersToFeet(gpsElevation)
+                    : gpsElevation;
+
+                return Center(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        'Measured: ${state.elevation} m',
-                        style: textTheme.bodyLarge,
+                      Gauge(
+                        value: displayPressure,
+                        unit: settingsState.pressure,
                       ),
-                      const SizedBox(width: Paddings.large),
+                      const SizedBox(height: 20),
                       Text(
-                        'GPS: ${state.gpsElevation} m',
-                        style: textTheme.bodyLarge,
+                        '${displayPressure.toStringAsFixed(1)} ${settingsState.pressure == PressureUnit.inHg ? 'inHg' : 'hPa'}',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Temperature: ${displayTemperature.toStringAsFixed(1)}°${settingsState.temperature == TemperatureUnit.fahrenheit ? 'F' : 'C'}',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Measured: ${displayMeasured.toStringAsFixed(1)} ${settingsState.distance == DistanceUnit.feet ? 'ft' : 'm'}',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      Text(
+                        'GPS: ${displayGPS.toStringAsFixed(1)} ${settingsState.distance == DistanceUnit.feet ? 'ft' : 'm'}',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],
-                  )
-                ],
-              );
-            },
-          ),
+                  ),
+                );
+              },
+            );
+          },
         ),
       ),
     );

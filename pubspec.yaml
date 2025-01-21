@@ -1,6 +1,6 @@
 name: altimetre
 description: "Altimètre barométrique"
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -16,20 +16,18 @@ dependencies:
   cupertino_icons: ^1.0.8
   sensors_plus: ^6.1.1
   google_fonts: ^6.2.1
-  geekyants_flutter_gauges: ^1.0.4
   flutter_bloc: ^9.0.0
   equatable: ^2.0.7
   shared_preferences: ^2.3.5
+  syncfusion_flutter_gauges: ^24.1.41
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
 
-
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
